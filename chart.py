@@ -14,7 +14,7 @@ SERPER_API_KEY = os.getenv("SERPER_API_KEY")
 CELLARTRACKER_USER = os.getenv("CELLARTRACKER_USER")
 CELLARTRACKER_PASS = os.getenv("CELLARTRACKER_PASS")
 
-@st.cache_data(ttl=0)
+@st.cache_data(show_spinner=False, ttl=1)
 def get_cellartracker_notes(wine_name):
     try:
         r = requests.get(
@@ -125,7 +125,7 @@ def fetch_page_text(url):
         pass
     return None
 
-@st.cache_data(ttl=0)
+@st.cache_data(show_spinner=False, ttl=1)
 def search_wine_reviews(wine_name):
     headers = {"X-API-KEY": SERPER_API_KEY, "Content-Type": "application/json"}
     url = "https://google.serper.dev/search"
