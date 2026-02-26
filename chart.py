@@ -23,7 +23,8 @@ def get_cellartracker_notes(wine_name):
                 "Password": CELLARTRACKER_PASS,
                 "Format": "Tab",
                 "Table": "Notes",
-                "Wine": wine_name
+                "Wine": wine_name,
+                "szSearch": wine_name
             },
             timeout=10
         )
@@ -38,16 +39,29 @@ def get_cellartracker_notes(wine_name):
         headers = [h.strip() for h in headers]
 
         if "TastingNotes" not in headers:
-            return "", f"No TastingNotes column. Headers: {headers}"
+            return "", f"No TastingNotes column."
 
         note_idx = headers.index("TastingNotes")
+        wine_idx = headers.index("Wine") if "Wine" in headers else -1
+
         notes = []
-        for line in lines[1:21]:
+        for line in lines[1:]:
             parts = line.split("\t")
             if len(parts) > note_idx:
+                # Only include notes where wine name roughly matches
+                if wine_idx >= 0:
+                    row_wine = parts[wine_idx].strip().lower()
+                    search_words = wine_name.lower().split()
+                    if not any(word in row_wine for word in search_words if len(word) > 3):
+                        continue
                 note = parts[note_idx].strip()
                 if note and len(note) > 20:
                     notes.append(note)
+            if len(notes) >= 20:
+                break
+
+        if not notes:
+            return "", "No matching notes found for this wine"
 
         return "\n\n".join(notes), None
     except Exception as e:
