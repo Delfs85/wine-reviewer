@@ -51,9 +51,10 @@ def get_cellartracker_notes(wine_name):
                 # Only include notes where wine name roughly matches
                 if wine_idx >= 0:
                     row_wine = parts[wine_idx].strip().lower()
-                    search_words = wine_name.lower().split()
-                    if not any(word in row_wine for word in search_words if len(word) > 3):
-                        continue
+                    search_words = [w.lower() for w in wine_name.split() if len(w) > 3]
+                matches = sum(1 for word in search_words if word in row_wine)
+                if matches < 1:
+                    continue
                 note = parts[note_idx].strip()
                 if note and len(note) > 20:
                     notes.append(note)
