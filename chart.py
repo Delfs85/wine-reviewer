@@ -6,11 +6,37 @@ import anthropic
 import json
 import os
 from dotenv import load_dotenv
+from urllib.parse import quote
 
 load_dotenv()
 
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 SERPER_API_KEY = os.getenv("SERPER_API_KEY")
+CELLARTRACKER_USER = os.getenv("CELLARTRACKER_USER")
+CELLARTRACKER_PASS = os.getenv("CELLARTRACKER_PASS")
+
+def get_cellartracker_notes(wine_name):
+    try:
+        url = "https://www.cellartracker.com/xlquery.asp"
+        params = {
+            "User": CELLARTRACKER_USER,
+            "Password": CELLARTRACKER_PASS,
+            "Format": "json",
+            "Table": "Notes",
+            "Wine": wine_name
+        }
+        response = requests.get(url, params=params, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            notes = []
+            for entry in data[:20]:  # Take up to 20 notes
+                note = entry.get("Note", "")
+                if note and len(note) > 20:
+                    notes.append(note)
+            return "\n\n".join(notes)
+    except Exception as e:
+        pass
+    return ""
 
 def fetch_page_text(url):
     try:
@@ -47,20 +73,20 @@ def search_wine_reviews(wine_name):
     queries = [
         f"{wine_name} site:cellartracker.com tasting notes",
         f"{wine_name} site:vivino.com tasting notes",
-        f"{wine_name} wine review tasting notes"
+        f"{wine_name} wine review tasting notes barnyard funky brett",
+        f"{wine_name} wine review"
     ]
 
     snippets = []
     sources = []
 
     for query in queries:
-        payload = {"q": query, "num": 3}
+        payload = {"q": query, "num": 10}
         response = requests.post(url, headers=headers, json=payload)
         results = response.json()
         for r in results.get("organic", []):
             link = r.get("link", "")
             if link and link not in [s["link"] for s in sources]:
-                # Try to fetch full page content
                 full_text = fetch_page_text(link)
                 if full_text:
                     snippets.append(full_text)
@@ -73,8 +99,13 @@ def search_wine_reviews(wine_name):
 
     return "\n\n".join(snippets), sources
 
-def analyse_wine(wine_name, review_text):
+def analyse_wine(wine_name, review_text, cellartracker_notes):
     client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+
+    combined_text = ""
+    if cellartracker_notes:
+        combined_text += f"=== CELLARTRACKER TASTING NOTES ===\n{cellartracker_notes}\n\n"
+    combined_text += f"=== WEB REVIEWS ===\n{review_text}"
     
     prompt = f"""You are an expert wine critic and sommelier with deep knowledge of natural wines,
 brett (brettanomyces), and funky/oxidative wine styles.
@@ -150,7 +181,7 @@ Sweetness (0-10): Look for "dry", "bone dry", "off-dry", "hint of sweetness", "s
 Danish: "tør", "sød", "restsødme".
 
 Reviews:
-{review_text}
+{combined_text}
 
 Respond ONLY with a JSON object in this exact format, no other text, no markdown, no backticks:
 {{
@@ -202,7 +233,7 @@ def draw_chart(wine_name, wine_type, scores):
     fill_color = color_map.get(wine_type, color_map["Red"])["fill"]
     alpha = alpha_map.get(wine_type, 0.35)
 
-    categories = ['Quality', 'Acidity', 'Tannins', 'Body', 'Fruitiness',
+    categories = ['Quality', 'Acidity', 'Tannins','Body', 'Fruitiness',
                   'Finish', 'Complexity', 'Funky', 'Brett', 'Alcohol', 'Sweetness']
     score_values = [scores[c] for c in categories]
 
@@ -242,20 +273,26 @@ with st.form("wine_form"):
     submitted = st.form_submit_button("Analyse Wine")
 
 if submitted and wine_name:
-    with st.spinner("Searching Cellartracker, Vivino and other sources..."):
+    with st.spinner("Fetching CellarTracker notes..."):
+        cellartracker_notes = get_cellartracker_notes(wine_name)
+
+    with st.spinner("Searching Vivino and other sources..."):
         review_text, sources = search_wine_reviews(wine_name)
-    
-    if not review_text:
+
+    if not review_text and not cellartracker_notes:
         st.error("No reviews found. Try a different wine name.")
     else:
         with st.spinner("Analysing reviews with AI..."):
             try:
-                result = analyse_wine(wine_name, review_text)
+                result = analyse_wine(wine_name, review_text, cellartracker_notes)
                 wine_type = result["wine_type"]
                 scores = result["scores"]
 
                 fig = draw_chart(wine_name, wine_type, scores)
                 st.pyplot(fig, use_container_width=False)
+
+                with st.expander("📝 CellarTracker notes"):
+                    st.write(cellartracker_notes if cellartracker_notes else "No CellarTracker notes found.")
 
                 with st.expander("📝 Raw review snippets"):
                     st.write(review_text)
