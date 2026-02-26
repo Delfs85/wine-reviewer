@@ -16,34 +16,41 @@ CELLARTRACKER_PASS = os.getenv("CELLARTRACKER_PASS")
 
 def get_cellartracker_notes(wine_name):
     try:
-        search_url = "https://www.cellartracker.com/xlquery.asp"
-        search_params = {
-            "User": CELLARTRACKER_USER,
-            "Password": CELLARTRACKER_PASS,
-            "Format": "json",
-            "Table": "List",
-            "Wine": wine_name
-        }
-        search_response = requests.get(search_url, params=search_params, timeout=10)
-        if search_response.status_code != 200:
-            return "", f"Status code: {search_response.status_code}"
-        wines = search_response.json()
+        r = requests.get(
+            "https://www.cellartracker.com/xlquery.asp",
+            params={
+                "User": CELLARTRACKER_USER,
+                "Password": CELLARTRACKER_PASS,
+                "Format": "json",
+                "Table": "List",
+                "Wine": wine_name
+            },
+            timeout=10
+        )
+        if r.status_code != 200:
+            return "", f"Status: {r.status_code}"
+        if not r.text.strip():
+            return "", "Empty response from CellarTracker"
+        wines = r.json()
         if not wines:
-            return "", f"No wines found. Response: {search_response.text[:300]}"
+            return "", "No wines matched"
         wine_id = wines[0].get("iWine")
         if not wine_id:
-            return "", f"No wine ID found. First result: {wines[0]}"
-        notes_params = {
-            "User": CELLARTRACKER_USER,
-            "Password": CELLARTRACKER_PASS,
-            "Format": "json",
-            "Table": "Notes",
-            "iWine": wine_id
-        }
-        notes_response = requests.get(search_url, params=notes_params, timeout=10)
-        if notes_response.status_code != 200:
-            return "", f"Notes status code: {notes_response.status_code}"
-        data = notes_response.json()
+            return "", f"No wine ID in result: {wines[0]}"
+        r2 = requests.get(
+            "https://www.cellartracker.com/xlquery.asp",
+            params={
+                "User": CELLARTRACKER_USER,
+                "Password": CELLARTRACKER_PASS,
+                "Format": "json",
+                "Table": "Notes",
+                "iWine": wine_id
+            },
+            timeout=10
+        )
+        if r2.status_code != 200:
+            return "", f"Notes status: {r2.status_code}"
+        data = r2.json()
         notes = []
         for entry in data[:20]:
             note = entry.get("Note", "")
@@ -52,6 +59,23 @@ def get_cellartracker_notes(wine_name):
         return "\n\n".join(notes), None
     except Exception as e:
         return "", str(e)
+
+def get_cellartracker_debug(wine_name):
+    try:
+        r = requests.get(
+            "https://www.cellartracker.com/xlquery.asp",
+            params={
+                "User": CELLARTRACKER_USER,
+                "Password": CELLARTRACKER_PASS,
+                "Format": "json",
+                "Table": "List",
+                "Wine": wine_name
+            },
+            timeout=10
+        )
+        return f"Status: {r.status_code} | Response: {r.text[:300]}"
+    except Exception as e:
+        return f"Error: {e}"
 
 def fetch_page_text(url):
     try:
@@ -152,14 +176,14 @@ Danish: "eftersmag", "lang", "kort".
 Complexity (0-10): Look for "complex", "layered", "multidimensional", "nuanced", "evolving",
 "simple", "straightforward". Danish: "kompleks", "lagdelt", "enkel".
 
-Funky (0-10): Score based on SMELL AND TASTE ONLY — not production methods.
+Funky (0-10): Score based on SMELL AND TASTE ONLY - not production methods.
 Look for these words in ANY language:
 English: "funky", "wild", "natural", "earthy", "smoke", "gunpowder", "reduction",
 "reductive", "sulfur", "struck match", "volatile", "VA", "brett-like", "sweaty",
 "unconventional", "acquired taste", "natural wine character".
 Danish: "funky", "vild", "naturvin", "jordagtig", "røg", "reduktiv", "ustabil",
 "elektrisk", "beskidt", "udfordrende", "naturlig".
-French: "sauvage", "terreux", "fumé", "réduit", "volatile".
+French: "sauvage", "terreux", "fume", "reduit", "volatile".
 Scoring:
 - 0-2: None of these descriptors present. Clean, conventional style.
 - 3-4: One or two mild hints.
@@ -170,10 +194,10 @@ Scoring:
 Brett (0-10): Look for these words in ANY language:
 English: "brett", "brettanomyces", "barnyard", "horse", "horse saddle", "stable",
 "wet dog", "band-aid", "earthy", "leather", "animal", "farm", "manure".
-Danish: "hestestald", "stald", "hest", "lo", "staldlugt", "læder", "dyrisk",
-"landlig", "bondegård", "beskidt".
-French: "écurie", "cheval", "cuir", "animal", "étable", "fumier".
-Also score higher if the wine is described as having strong "terroir" character
+Danish: "hestestald", "stald", "hest", "lo", "staldlugt", "laeder", "dyrisk",
+"landlig", "bondegaard", "beskidt".
+French: "ecurie", "cheval", "cuir", "animal", "etable", "fumier".
+Also score higher if the wine is described as having strong terroir character
 in a specifically animal or earthy sense in any language.
 Scoring:
 - 0-2: No brett descriptors present whatsoever.
@@ -188,7 +212,7 @@ Alcohol (0-10): Look for actual % if mentioned (under 12% = 3, 12-13% = 5, 13-14
 
 Sweetness (0-10): Look for "dry", "bone dry", "off-dry", "hint of sweetness", "semi-sweet",
 "sweet", "residual sugar". Bone dry = 1, dry = 2, off-dry = 4, semi-sweet = 6, sweet = 8+.
-Danish: "tør", "sød", "restsødme".
+Danish: "tor", "sod", "restsodme".
 
 Reviews:
 {combined_text}
@@ -211,7 +235,7 @@ Respond ONLY with a JSON object in this exact format, no other text, no markdown
   }}
 }}
 
-wine_type must be one of: Red, White, Rosé, Orange"""
+wine_type must be one of: Red, White, Rose, Orange"""
 
     message = client.messages.create(
         model="claude-sonnet-4-6",
@@ -231,10 +255,10 @@ def draw_chart(wine_name, wine_type, scores):
     color_map = {
         "Red":    {"line": "#8B0000", "fill": "#8B0000"},
         "White":  {"line": "#7A8C00", "fill": "#7A8C00"},
-        "Rosé":   {"line": "#DC6478", "fill": "#DC6478"},
+        "Rose":   {"line": "#DC6478", "fill": "#DC6478"},
         "Orange": {"line": "#C87814", "fill": "#C87814"},
     }
-    alpha_map = {"Red": 0.35, "White": 0.2, "Rosé": 0.2, "Orange": 0.2}
+    alpha_map = {"Red": 0.35, "White": 0.2, "Rose": 0.2, "Orange": 0.2}
     line_color = color_map.get(wine_type, color_map["Red"])["line"]
     fill_color = color_map.get(wine_type, color_map["Red"])["fill"]
     alpha = alpha_map.get(wine_type, 0.35)
@@ -269,7 +293,7 @@ def draw_chart(wine_name, wine_type, scores):
 st.title("🍷 Wine Reviewer")
 
 with st.form("wine_form"):
-    wine_name = st.text_input("Wine Name", placeholder="e.g. Château Margaux 2018")
+    wine_name = st.text_input("Wine Name", placeholder="e.g. Chateau Margaux 2018")
     submitted = st.form_submit_button("Analyse Wine")
 
 if submitted and wine_name:
@@ -294,23 +318,9 @@ if submitted and wine_name:
                     if cellartracker_notes:
                         st.write(cellartracker_notes)
                     else:
-                        st.write(f"No CellarTracker notes found. Debug: {ct_error}")
-                        try:
-                            r = requests.get(
-                                "https://www.cellartracker.com/xlquery.asp",
-                                params={
-                                    "User": CELLARTRACKER_USER,
-                                    "Password": CELLARTRACKER_PASS,
-                                    "Format": "json",
-                                    "Table": "List",
-                                    "Wine": wine_name
-                                },
-                                timeout=10
-                            )
-                            st.write(f"Status: {r.status_code}")
-                            st.write(f"Raw response: {r.text[:500]}")
-                        except Exception as e:
-                            st.write(f"Request error: {e}")
+                        st.write(f"No CellarTracker notes found.")
+                        st.write(f"Debug: {ct_error}")
+                        st.write(get_cellartracker_debug(wine_name))
 
                 with st.expander("📝 Raw review snippets"):
                     st.write(review_text)
