@@ -203,15 +203,12 @@ English: "funky", "wild", "natural", "earthy", "smoke", "gunpowder", "reduction"
 Danish: "funky", "vild", "naturvin", "jordagtig", "røg", "reduktiv", "ustabil",
 "elektrisk", "beskidt", "udfordrende", "naturlig".
 French: "sauvage", "terreux", "fume", "reduit", "volatile".
-IMPORTANT: If ANY reviewer says the wine has "too much" of these characteristics,
-or explicitly complains about gunpowder, funkiness or natural wine taste, score 8 or higher.
-If a descriptor is mentioned negatively or as a flaw, that means it is very present — score high.
 Scoring:
 - 0-2: None of these descriptors present. Clean, conventional style.
-- 3-4: One or two mild hints mentioned positively.
-- 5-6: Clearly present but not dominant.
-- 7-8: Strongly present, mentioned by multiple reviewers OR mentioned as excessive/a flaw.
-- 9-10: Overwhelming, repeatedly flagged as too much or a major characteristic.
+- 3-4: One or two mild hints.
+- 5-6: Several descriptors present or one strongly mentioned.
+- 7-8: Multiple descriptors clearly present, clearly a funky/wild style.
+- 9-10: Dominated by these characteristics, very challenging/funky style.
 
 Brett (0-10): Look for these words in ANY language:
 English: "brett", "brettanomyces", "barnyard", "horse", "horse saddle", "stable",
@@ -221,14 +218,12 @@ Danish: "hestestald", "stald", "hest", "lo", "staldlugt", "laeder", "dyrisk",
 French: "ecurie", "cheval", "cuir", "animal", "etable", "fumier".
 Also score higher if the wine is described as having strong terroir character
 in a specifically animal or earthy sense in any language.
-IMPORTANT: If ANY reviewer explicitly mentions brett by name or says there is "lots of brett",
-score 8 or higher immediately. A complaint about brett means it is very present.
 Scoring:
 - 0-2: No brett descriptors present whatsoever.
-- 3-4: One mild hint mentioned once.
-- 5-6: Clearly present, mentioned positively or neutrally.
-- 7-8: Strongly present, explicitly named or mentioned as excessive by any reviewer.
-- 9-10: Brett is dominant, repeatedly mentioned or flagged as a major flaw by multiple reviewers.
+- 3-4: One mild hint.
+- 5-6: One descriptor clearly present or two mentioned mildly.
+- 7-8: Multiple brett descriptors clearly present.
+- 9-10: Brett is dominant and repeatedly mentioned.
 
 Alcohol (0-10): Look for actual % if mentioned (under 12% = 3, 12-13% = 5, 13-14% = 7,
 14-15% = 8, over 15% = 9-10). Also words like "hot", "warming", "heady", "low alcohol",
