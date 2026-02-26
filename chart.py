@@ -12,6 +12,34 @@ load_dotenv()
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 SERPER_API_KEY = os.getenv("SERPER_API_KEY")
 
+def fetch_page_text(url):
+    try:
+        headers = {"User-Agent": "Mozilla/5.0"}
+        response = requests.get(url, headers=headers, timeout=10)
+        if response.status_code == 200:
+            from html.parser import HTMLParser
+            class TextExtractor(HTMLParser):
+                def __init__(self):
+                    super().__init__()
+                    self.text = []
+                    self.skip = False
+                def handle_starttag(self, tag, attrs):
+                    if tag in ['script', 'style', 'nav', 'header', 'footer']:
+                        self.skip = True
+                def handle_endtag(self, tag):
+                    if tag in ['script', 'style', 'nav', 'header', 'footer']:
+                        self.skip = False
+                def handle_data(self, data):
+                    if not self.skip and data.strip():
+                        self.text.append(data.strip())
+            parser = TextExtractor()
+            parser.feed(response.text)
+            full_text = " ".join(parser.text)
+            return full_text[:3000]
+    except:
+        pass
+    return None
+
 def search_wine_reviews(wine_name):
     headers = {"X-API-KEY": SERPER_API_KEY, "Content-Type": "application/json"}
     url = "https://google.serper.dev/search"
@@ -30,11 +58,17 @@ def search_wine_reviews(wine_name):
         response = requests.post(url, headers=headers, json=payload)
         results = response.json()
         for r in results.get("organic", []):
-            if "snippet" in r and r.get("link") not in [s["link"] for s in sources]:
-                snippets.append(r["snippet"])
+            link = r.get("link", "")
+            if link and link not in [s["link"] for s in sources]:
+                # Try to fetch full page content
+                full_text = fetch_page_text(link)
+                if full_text:
+                    snippets.append(full_text)
+                elif "snippet" in r:
+                    snippets.append(r["snippet"])
                 sources.append({
                     "title": r.get("title", "Unknown"),
-                    "link": r.get("link", "")
+                    "link": link
                 })
 
     return "\n\n".join(snippets), sources
