@@ -318,7 +318,25 @@ if submitted and wine_name:
                 st.pyplot(fig, use_container_width=False)
 
                 with st.expander("📝 CellarTracker notes"):
-                    st.write(cellartracker_notes if cellartracker_notes else "No CellarTracker notes found.")
+    if cellartracker_notes:
+        st.write(cellartracker_notes)
+    else:
+        st.write("No CellarTracker notes found.")
+        # Debug - show what the API returns
+        try:
+            search_url = "https://www.cellartracker.com/xlquery.asp"
+            search_params = {
+                "User": CELLARTRACKER_USER,
+                "Password": CELLARTRACKER_PASS,
+                "Format": "json",
+                "Table": "List",
+                "Wine": wine_name
+            }
+            r = requests.get(search_url, params=search_params, timeout=10)
+            st.write(f"Status code: {r.status_code}")
+            st.write(f"Response: {r.text[:500]}")
+        except Exception as e:
+            st.write(f"Error: {e}")
 
                 with st.expander("📝 Raw review snippets"):
                     st.write(review_text)
