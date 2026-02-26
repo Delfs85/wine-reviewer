@@ -42,21 +42,67 @@ def search_wine_reviews(wine_name):
 def analyse_wine(wine_name, review_text):
     client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
     
-    prompt = f"""You are a wine expert. Based on the following reviews of "{wine_name}", 
-extract scores from 0-10 for each of these parameters. Also determine the wine type.
+    prompt = f"""You are an expert wine critic and sommelier with deep knowledge of natural wines,
+brett (brettanomyces), and funky/oxidative wine styles.
 
-Parameters to score:
-- Quality (overall quality)
-- Acidity
-- Tannins
-- Body
-- Fruitiness
-- Finish
-- Complexity
-- Funky (how funky/natural does it smell and taste - gunpowder, barnyard, natural wine character in aroma and taste only, not production method)
-- Brett (brettanomyces character)
-- Alcohol (how high is the alcohol level)
-- Sweetness
+Analyse the following reviews of "{wine_name}" and score each parameter from 0-10.
+Be sensitive to subtle language — reviewers rarely use technical terms directly,
+so you must interpret descriptive language carefully.
+
+SCORING GUIDANCE:
+
+Quality (0-10): Overall quality and pleasure. Use any mention of scores (e.g. 90 points = ~8,
+95 points = ~9), words like "exceptional", "outstanding", "disappointing", "simple" etc.
+
+Acidity (0-10): Look for words like "fresh", "crisp", "tart", "bright", "zippy", "lively",
+"sharp", "sour", "low acid", "flat", "flabby".
+
+Tannins (0-10): Look for "grippy", "firm", "chewy", "silky", "smooth", "velvety", "astringent",
+"drying", "fine-grained", "dusty", "soft tannins", "tannic".
+
+Body (0-10): Look for "full-bodied", "medium-bodied", "light-bodied", "weighty", "substantial",
+"lean", "thin", "concentrated", "dense".
+
+Fruitiness (0-10): Look for fruit descriptors like "red fruits", "black fruits", "cherry",
+"plum", "raspberry", "citrus", "tropical", "stone fruit". Low score if described as "savory",
+"mineral", "earthy" with little fruit.
+
+Finish (0-10): Look for "long finish", "persistent", "lingering", "short finish", "clean finish",
+"aftertaste".
+
+Complexity (0-10): Look for "complex", "layered", "multidimensional", "nuanced", "evolving",
+"simple", "straightforward", "one-dimensional".
+
+Funky (0-10): Score based on SMELL AND TASTE ONLY — not production methods.
+Look ONLY for these specific words and phrases:
+"funky", "wild", "natural", "earthy", "smoke", "gunpowder", "reduction", "reductive",
+"sulfur", "struck match", "volatile", "VA", "brett-like", "sweaty", "unconventional",
+"acquired taste", "natural wine character".
+Scoring:
+- 0-2: None of these descriptors present. Clean, conventional style.
+- 3-4: One or two mild hints (e.g. slight earthiness or hint of reduction).
+- 5-6: Several descriptors present or one strongly mentioned.
+- 7-8: Multiple descriptors clearly present, clearly a funky/wild style.
+- 9-10: Dominated by these characteristics, very challenging/funky style.
+
+Brett (0-10): Look ONLY for these specific words and phrases:
+"brett", "brettanomyces", "barnyard", "horse", "horse saddle", "stable", "wet dog",
+"band-aid", "earthy", "leather", "animal", "farm", "manure".
+Also score higher if the wine is described as having strong "terroir" character
+in a specifically animal or earthy sense.
+Scoring:
+- 0-2: No brett descriptors present whatsoever.
+- 3-4: One mild hint (e.g. slight leather or earthy note mentioned once).
+- 5-6: One descriptor clearly present or two mentioned mildly.
+- 7-8: Multiple brett descriptors clearly present.
+- 9-10: Brett is dominant and repeatedly mentioned.
+
+Alcohol (0-10): Look for actual % if mentioned (under 12% = 3, 12-13% = 5, 13-14% = 7,
+14-15% = 8, over 15% = 9-10). Also words like "hot", "warming", "heady", "low alcohol",
+"light", "easy drinking".
+
+Sweetness (0-10): Look for "dry", "bone dry", "off-dry", "hint of sweetness", "semi-sweet",
+"sweet", "residual sugar", "RS". Bone dry = 1, dry = 2, off-dry = 4, semi-sweet = 6, sweet = 8+.
 
 Reviews:
 {review_text}
@@ -162,8 +208,7 @@ if submitted and wine_name:
                 result = analyse_wine(wine_name, review_text)
                 wine_type = result["wine_type"]
                 scores = result["scores"]
-                
-                
+
                 fig = draw_chart(wine_name, wine_type, scores)
                 st.pyplot(fig, use_container_width=False)
 
@@ -179,3 +224,10 @@ if submitted and wine_name:
 
 elif submitted and not wine_name:
     st.warning("Please enter a wine name.")
+```
+
+Save with **Ctrl+S**, then push to GitHub to update the live app:
+```
+git add .
+git commit -m "refine funky and brett scoring"
+git push
