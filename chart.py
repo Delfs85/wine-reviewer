@@ -22,7 +22,7 @@ def get_cellartracker_notes(wine_name):
                 "User": CELLARTRACKER_USER,
                 "Password": CELLARTRACKER_PASS,
                 "Format": "Tab",
-                "Table": "List",
+                "Table": "Notes",
                 "Wine": wine_name
             },
             timeout=10
@@ -32,43 +32,17 @@ def get_cellartracker_notes(wine_name):
 
         lines = r.text.strip().split("\n")
         if len(lines) < 2:
-            return "", "No wines found in response"
-
-        headers = lines[0].split("\t")
-        if "iWine" not in headers:
-            return "", f"Unexpected format. Headers: {headers[:5]}"
-
-        wine_id_idx = headers.index("iWine")
-        wine_id = lines[1].split("\t")[wine_id_idx].strip()
-
-        if not wine_id:
-            return "", "No wine ID found"
-
-        r2 = requests.get(
-            "https://www.cellartracker.com/xlquery.asp",
-            params={
-                "User": CELLARTRACKER_USER,
-                "Password": CELLARTRACKER_PASS,
-                "Format": "Tab",
-                "Table": "Notes",
-                "iWine": wine_id
-            },
-            timeout=10
-        )
-        if r2.status_code != 200 or not r2.text.strip():
-            return "", f"Notes status: {r2.status_code}"
-
-        note_lines = r2.text.strip().split("\n")
-        if len(note_lines) < 2:
             return "", "No notes found"
 
-        note_headers = note_lines[0].split("\t")
-        if "TastingNotes" not in note_headers:
-            return "", f"No TastingNotes column. All headers: {note_headers}"
+        headers = lines[0].split("\t")
+        headers = [h.strip() for h in headers]
 
-        note_idx = note_headers.index("TastingNotes")
+        if "TastingNotes" not in headers:
+            return "", f"No TastingNotes column. Headers: {headers}"
+
+        note_idx = headers.index("TastingNotes")
         notes = []
-        for line in note_lines[1:21]:
+        for line in lines[1:21]:
             parts = line.split("\t")
             if len(parts) > note_idx:
                 note = parts[note_idx].strip()
