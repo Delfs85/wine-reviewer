@@ -17,26 +17,52 @@ CELLARTRACKER_PASS = os.getenv("CELLARTRACKER_PASS")
 
 def get_cellartracker_notes(wine_name):
     try:
-        url = "https://www.cellartracker.com/xlquery.asp"
-        params = {
+        # First search for the wine to get its ID
+        search_url = "https://www.cellartracker.com/xlquery.asp"
+        search_params = {
+            "User": CELLARTRACKER_USER,
+            "Password": CELLARTRACKER_PASS,
+            "Format": "json",
+            "Table": "List",
+            "Wine": wine_name
+        }
+        search_response = requests.get(search_url, params=search_params, timeout=10)
+        
+        if search_response.status_code != 200:
+            return ""
+            
+        wines = search_response.json()
+        if not wines:
+            return ""
+        
+        # Take the first matching wine's ID
+        wine_id = wines[0].get("iWine")
+        if not wine_id:
+            return ""
+        
+        # Now fetch tasting notes for that wine ID
+        notes_params = {
             "User": CELLARTRACKER_USER,
             "Password": CELLARTRACKER_PASS,
             "Format": "json",
             "Table": "Notes",
-            "Wine": wine_name
+            "iWine": wine_id
         }
-        response = requests.get(url, params=params, timeout=10)
-        if response.status_code == 200:
-            data = response.json()
-            notes = []
-            for entry in data[:20]:  # Take up to 20 notes
-                note = entry.get("Note", "")
-                if note and len(note) > 20:
-                    notes.append(note)
-            return "\n\n".join(notes)
+        notes_response = requests.get(search_url, params=notes_params, timeout=10)
+        
+        if notes_response.status_code != 200:
+            return ""
+            
+        data = notes_response.json()
+        notes = []
+        for entry in data[:20]:
+            note = entry.get("Note", "")
+            if note and len(note) > 20:
+                notes.append(note)
+        return "\n\n".join(notes)
+        
     except Exception as e:
-        pass
-    return ""
+        return ""
 
 def fetch_page_text(url):
     try:
