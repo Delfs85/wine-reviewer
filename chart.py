@@ -6,7 +6,6 @@ import anthropic
 import json
 import os
 from dotenv import load_dotenv
-from urllib.parse import quote
 
 load_dotenv()
 
@@ -17,7 +16,6 @@ CELLARTRACKER_PASS = os.getenv("CELLARTRACKER_PASS")
 
 def get_cellartracker_notes(wine_name):
     try:
-        # First search for the wine to get its ID
         search_url = "https://www.cellartracker.com/xlquery.asp"
         search_params = {
             "User": CELLARTRACKER_USER,
@@ -27,20 +25,14 @@ def get_cellartracker_notes(wine_name):
             "Wine": wine_name
         }
         search_response = requests.get(search_url, params=search_params, timeout=10)
-        
         if search_response.status_code != 200:
-            return ""
-            
+            return "", f"Status code: {search_response.status_code}"
         wines = search_response.json()
         if not wines:
-            return ""
-        
-        # Take the first matching wine's ID
+            return "", f"No wines found. Response: {search_response.text[:300]}"
         wine_id = wines[0].get("iWine")
         if not wine_id:
-            return ""
-        
-        # Now fetch tasting notes for that wine ID
+            return "", f"No wine ID found. First result: {wines[0]}"
         notes_params = {
             "User": CELLARTRACKER_USER,
             "Password": CELLARTRACKER_PASS,
@@ -49,20 +41,17 @@ def get_cellartracker_notes(wine_name):
             "iWine": wine_id
         }
         notes_response = requests.get(search_url, params=notes_params, timeout=10)
-        
         if notes_response.status_code != 200:
-            return ""
-            
+            return "", f"Notes status code: {notes_response.status_code}"
         data = notes_response.json()
         notes = []
         for entry in data[:20]:
             note = entry.get("Note", "")
             if note and len(note) > 20:
                 notes.append(note)
-        return "\n\n".join(notes)
-        
+        return "\n\n".join(notes), None
     except Exception as e:
-        return ""
+        return "", str(e)
 
 def fetch_page_text(url):
     try:
@@ -95,17 +84,14 @@ def fetch_page_text(url):
 def search_wine_reviews(wine_name):
     headers = {"X-API-KEY": SERPER_API_KEY, "Content-Type": "application/json"}
     url = "https://google.serper.dev/search"
-
     queries = [
         f"{wine_name} site:cellartracker.com tasting notes",
         f"{wine_name} site:vivino.com tasting notes",
         f"{wine_name} wine review tasting notes barnyard funky brett",
         f"{wine_name} wine review"
     ]
-
     snippets = []
     sources = []
-
     for query in queries:
         payload = {"q": query, "num": 10}
         response = requests.post(url, headers=headers, json=payload)
@@ -122,17 +108,15 @@ def search_wine_reviews(wine_name):
                     "title": r.get("title", "Unknown"),
                     "link": link
                 })
-
     return "\n\n".join(snippets), sources
 
 def analyse_wine(wine_name, review_text, cellartracker_notes):
     client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
-
     combined_text = ""
     if cellartracker_notes:
         combined_text += f"=== CELLARTRACKER TASTING NOTES ===\n{cellartracker_notes}\n\n"
     combined_text += f"=== WEB REVIEWS ===\n{review_text}"
-    
+
     prompt = f"""You are an expert wine critic and sommelier with deep knowledge of natural wines,
 brett (brettanomyces), and funky/oxidative wine styles.
 
@@ -234,15 +218,12 @@ wine_type must be one of: Red, White, Rosé, Orange"""
         max_tokens=500,
         messages=[{"role": "user", "content": prompt}]
     )
-    
     raw = message.content[0].text.strip()
-    
     if raw.startswith("```"):
         raw = raw.split("```")[1]
         if raw.startswith("json"):
             raw = raw[4:]
     raw = raw.strip()
-    
     result = json.loads(raw)
     return result
 
@@ -254,27 +235,21 @@ def draw_chart(wine_name, wine_type, scores):
         "Orange": {"line": "#C87814", "fill": "#C87814"},
     }
     alpha_map = {"Red": 0.35, "White": 0.2, "Rosé": 0.2, "Orange": 0.2}
-
     line_color = color_map.get(wine_type, color_map["Red"])["line"]
     fill_color = color_map.get(wine_type, color_map["Red"])["fill"]
     alpha = alpha_map.get(wine_type, 0.35)
-
-    categories = ['Quality', 'Acidity', 'Tannins','Body', 'Fruitiness',
+    categories = ['Quality', 'Acidity', 'Tannins', 'Body', 'Fruitiness',
                   'Finish', 'Complexity', 'Funky', 'Brett', 'Alcohol', 'Sweetness']
     score_values = [scores[c] for c in categories]
-
     N = len(categories)
     angles = np.linspace(0, 2 * np.pi, N, endpoint=False).tolist()
     angles_closed = angles + [angles[0]]
     scores_closed = score_values + [score_values[0]]
-
     fig, ax = plt.subplots(figsize=(5, 5), subplot_kw=dict(polar=True))
     ax.set_theta_zero_location('N')
     ax.set_theta_direction(-1)
-
     ax.plot(angles_closed, scores_closed, color=line_color, linewidth=2)
     ax.fill(angles_closed, scores_closed, color=fill_color, alpha=alpha)
-
     ax.set_ylim(0, 10)
     ax.set_yticks([2, 4, 6, 8, 10])
     ax.set_yticklabels([])
@@ -288,7 +263,6 @@ def draw_chart(wine_name, wine_type, scores):
     ax.set_title(wine_name, pad=20, fontsize=13, fontweight='bold')
     ax.set_facecolor('white')
     fig.patch.set_facecolor('white')
-
     return fig
 
 # --- App ---
@@ -300,7 +274,7 @@ with st.form("wine_form"):
 
 if submitted and wine_name:
     with st.spinner("Fetching CellarTracker notes..."):
-        cellartracker_notes = get_cellartracker_notes(wine_name)
+        cellartracker_notes, ct_error = get_cellartracker_notes(wine_name)
 
     with st.spinner("Searching Vivino and other sources..."):
         review_text, sources = search_wine_reviews(wine_name)
@@ -313,44 +287,14 @@ if submitted and wine_name:
                 result = analyse_wine(wine_name, review_text, cellartracker_notes)
                 wine_type = result["wine_type"]
                 scores = result["scores"]
-
                 fig = draw_chart(wine_name, wine_type, scores)
                 st.pyplot(fig, use_container_width=False)
 
-                 with st.expander("📝 CellarTracker notes"):
+                with st.expander("📝 CellarTracker notes"):
                     if cellartracker_notes:
                         st.write(cellartracker_notes)
                     else:
-                        st.write("No CellarTracker notes found.")
-                        try:
-                            search_url = "https://www.cellartracker.com/xlquery.asp"
-                            search_params = {
-                                "User": CELLARTRACKER_USER,
-                                "Password": CELLARTRACKER_PASS,
-                                "Format": "json",
-                                "Table": "List",
-                                "Wine": wine_name
-                            }
-                            r = requests.get(search_url, params=search_params, timeout=10)
-                            st.write(f"Status code: {r.status_code}")
-                            st.write(f"Response: {r.text[:500]}")
-                        except Exception as e:
-                            st.write(f"Error: {e}")
-        # Debug - show what the API returns
-        try:
-            search_url = "https://www.cellartracker.com/xlquery.asp"
-            search_params = {
-                "User": CELLARTRACKER_USER,
-                "Password": CELLARTRACKER_PASS,
-                "Format": "json",
-                "Table": "List",
-                "Wine": wine_name
-            }
-            r = requests.get(search_url, params=search_params, timeout=10)
-            st.write(f"Status code: {r.status_code}")
-            st.write(f"Response: {r.text[:500]}")
-        except Exception as e:
-            st.write(f"Error: {e}")
+                        st.write(f"No CellarTracker notes found. Debug: {ct_error}")
 
                 with st.expander("📝 Raw review snippets"):
                     st.write(review_text)
