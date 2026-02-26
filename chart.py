@@ -224,10 +224,3 @@ if submitted and wine_name:
 
 elif submitted and not wine_name:
     st.warning("Please enter a wine name.")
-```
-
-Save with **Ctrl+S**, then push to GitHub to update the live app:
-```
-git add .
-git commit -m "refine funky and brett scoring"
-git push
