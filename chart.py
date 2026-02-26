@@ -21,41 +21,60 @@ def get_cellartracker_notes(wine_name):
             params={
                 "User": CELLARTRACKER_USER,
                 "Password": CELLARTRACKER_PASS,
-                "Format": "json",
+                "Format": "Tab",
                 "Table": "List",
                 "Wine": wine_name
             },
             timeout=10
         )
-        if r.status_code != 200:
+        if r.status_code != 200 or not r.text.strip():
             return "", f"Status: {r.status_code}"
-        if not r.text.strip():
-            return "", "Empty response from CellarTracker"
-        wines = r.json()
-        if not wines:
-            return "", "No wines matched"
-        wine_id = wines[0].get("iWine")
+
+        lines = r.text.strip().split("\n")
+        if len(lines) < 2:
+            return "", "No wines found in response"
+
+        headers = lines[0].split("\t")
+        if "iWine" not in headers:
+            return "", f"Unexpected format. Headers: {headers[:5]}"
+
+        wine_id_idx = headers.index("iWine")
+        wine_id = lines[1].split("\t")[wine_id_idx].strip()
+
         if not wine_id:
-            return "", f"No wine ID in result: {wines[0]}"
+            return "", "No wine ID found"
+
         r2 = requests.get(
             "https://www.cellartracker.com/xlquery.asp",
             params={
                 "User": CELLARTRACKER_USER,
                 "Password": CELLARTRACKER_PASS,
-                "Format": "json",
+                "Format": "Tab",
                 "Table": "Notes",
                 "iWine": wine_id
             },
             timeout=10
         )
-        if r2.status_code != 200:
+        if r2.status_code != 200 or not r2.text.strip():
             return "", f"Notes status: {r2.status_code}"
-        data = r2.json()
+
+        note_lines = r2.text.strip().split("\n")
+        if len(note_lines) < 2:
+            return "", "No notes found"
+
+        note_headers = note_lines[0].split("\t")
+        if "Note" not in note_headers:
+            return "", f"No Note column. Headers: {note_headers[:5]}"
+
+        note_idx = note_headers.index("Note")
         notes = []
-        for entry in data[:20]:
-            note = entry.get("Note", "")
-            if note and len(note) > 20:
-                notes.append(note)
+        for line in note_lines[1:21]:
+            parts = line.split("\t")
+            if len(parts) > note_idx:
+                note = parts[note_idx].strip()
+                if note and len(note) > 20:
+                    notes.append(note)
+
         return "\n\n".join(notes), None
     except Exception as e:
         return "", str(e)
