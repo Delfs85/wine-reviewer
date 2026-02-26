@@ -295,6 +295,22 @@ if submitted and wine_name:
                         st.write(cellartracker_notes)
                     else:
                         st.write(f"No CellarTracker notes found. Debug: {ct_error}")
+                        try:
+                            r = requests.get(
+                                "https://www.cellartracker.com/xlquery.asp",
+                                params={
+                                    "User": CELLARTRACKER_USER,
+                                    "Password": CELLARTRACKER_PASS,
+                                    "Format": "json",
+                                    "Table": "List",
+                                    "Wine": wine_name
+                                },
+                                timeout=10
+                            )
+                            st.write(f"Status: {r.status_code}")
+                            st.write(f"Raw response: {r.text[:500]}")
+                        except Exception as e:
+                            st.write(f"Request error: {e}")
 
                 with st.expander("📝 Raw review snippets"):
                     st.write(review_text)
