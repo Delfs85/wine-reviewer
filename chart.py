@@ -321,6 +321,7 @@ with st.form("wine_form"):
     submitted = st.form_submit_button("Analyse Wine")
 
 if submitted and wine_name:
+    st.cache_data.clear()
     with st.spinner("Fetching CellarTracker notes..."):
         cellartracker_notes, ct_error = get_cellartracker_notes(wine_name)
 
