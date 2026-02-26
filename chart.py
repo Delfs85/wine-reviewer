@@ -63,10 +63,10 @@ def get_cellartracker_notes(wine_name):
             return "", "No notes found"
 
         note_headers = note_lines[0].split("\t")
-        if "Note" not in note_headers:
-            return "", f"No Note column. All headers: {note_headers}"
+        if "TastingNotes" not in note_headers:
+            return "", f"No TastingNotes column. All headers: {note_headers}"
 
-        note_idx = note_headers.index("Note")
+        note_idx = note_headers.index("TastingNotes")
         notes = []
         for line in note_lines[1:21]:
             parts = line.split("\t")
