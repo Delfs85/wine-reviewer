@@ -45,9 +45,12 @@ def analyse_wine(wine_name, review_text):
     prompt = f"""You are an expert wine critic and sommelier with deep knowledge of natural wines,
 brett (brettanomyces), and funky/oxidative wine styles.
 
+IMPORTANT: Reviews may be in any language including Danish, French, German, Spanish etc.
+You must recognise and score based on descriptors in ALL languages.
+
 Analyse the following reviews of "{wine_name}" and score each parameter from 0-10.
 Be sensitive to subtle language — reviewers rarely use technical terms directly,
-so you must interpret descriptive language carefully.
+so you must interpret descriptive language carefully across all languages.
 
 SCORING GUIDANCE:
 
@@ -55,54 +58,62 @@ Quality (0-10): Overall quality and pleasure. Use any mention of scores (e.g. 90
 95 points = ~9), words like "exceptional", "outstanding", "disappointing", "simple" etc.
 
 Acidity (0-10): Look for words like "fresh", "crisp", "tart", "bright", "zippy", "lively",
-"sharp", "sour", "low acid", "flat", "flabby".
+"sharp", "sour", "low acid", "flat", "flabby". Danish: "syre", "frisk", "syrlig".
 
 Tannins (0-10): Look for "grippy", "firm", "chewy", "silky", "smooth", "velvety", "astringent",
-"drying", "fine-grained", "dusty", "soft tannins", "tannic".
+"drying", "fine-grained", "dusty", "soft tannins", "tannic". Danish: "tannin", "garvesyre".
 
 Body (0-10): Look for "full-bodied", "medium-bodied", "light-bodied", "weighty", "substantial",
-"lean", "thin", "concentrated", "dense".
+"lean", "thin", "concentrated", "dense". Danish: "fyldig", "let", "kraftig".
 
 Fruitiness (0-10): Look for fruit descriptors like "red fruits", "black fruits", "cherry",
-"plum", "raspberry", "citrus", "tropical", "stone fruit". Low score if described as "savory",
-"mineral", "earthy" with little fruit.
+"plum", "raspberry", "citrus", "tropical", "stone fruit". Danish: "frugt", "kirsebær",
+"jordbær", "hindbær", "solbær", "blomme". Low score if described as "savory" or "earthy"
+with little fruit.
 
-Finish (0-10): Look for "long finish", "persistent", "lingering", "short finish", "clean finish",
-"aftertaste".
+Finish (0-10): Look for "long finish", "persistent", "lingering", "short finish".
+Danish: "eftersmag", "lang", "kort".
 
 Complexity (0-10): Look for "complex", "layered", "multidimensional", "nuanced", "evolving",
-"simple", "straightforward", "one-dimensional".
+"simple", "straightforward". Danish: "kompleks", "lagdelt", "enkel".
 
 Funky (0-10): Score based on SMELL AND TASTE ONLY — not production methods.
-Look ONLY for these specific words and phrases:
-"funky", "wild", "natural", "earthy", "smoke", "gunpowder", "reduction", "reductive",
-"sulfur", "struck match", "volatile", "VA", "brett-like", "sweaty", "unconventional",
-"acquired taste", "natural wine character".
+Look for these words in ANY language:
+English: "funky", "wild", "natural", "earthy", "smoke", "gunpowder", "reduction",
+"reductive", "sulfur", "struck match", "volatile", "VA", "brett-like", "sweaty",
+"unconventional", "acquired taste", "natural wine character".
+Danish: "funky", "vild", "naturvin", "jordagtig", "røg", "reduktiv", "ustabil",
+"elektrisk", "beskidt", "udfordrende", "naturlig".
+French: "sauvage", "terreux", "fumé", "réduit", "volatile".
 Scoring:
 - 0-2: None of these descriptors present. Clean, conventional style.
-- 3-4: One or two mild hints (e.g. slight earthiness or hint of reduction).
+- 3-4: One or two mild hints.
 - 5-6: Several descriptors present or one strongly mentioned.
 - 7-8: Multiple descriptors clearly present, clearly a funky/wild style.
 - 9-10: Dominated by these characteristics, very challenging/funky style.
 
-Brett (0-10): Look ONLY for these specific words and phrases:
-"brett", "brettanomyces", "barnyard", "horse", "horse saddle", "stable", "wet dog",
-"band-aid", "earthy", "leather", "animal", "farm", "manure".
+Brett (0-10): Look for these words in ANY language:
+English: "brett", "brettanomyces", "barnyard", "horse", "horse saddle", "stable",
+"wet dog", "band-aid", "earthy", "leather", "animal", "farm", "manure".
+Danish: "hestestald", "stald", "hest", "lo", "staldlugt", "læder", "dyrisk",
+"landlig", "bondegård", "beskidt".
+French: "écurie", "cheval", "cuir", "animal", "étable", "fumier".
 Also score higher if the wine is described as having strong "terroir" character
-in a specifically animal or earthy sense.
+in a specifically animal or earthy sense in any language.
 Scoring:
 - 0-2: No brett descriptors present whatsoever.
-- 3-4: One mild hint (e.g. slight leather or earthy note mentioned once).
+- 3-4: One mild hint.
 - 5-6: One descriptor clearly present or two mentioned mildly.
 - 7-8: Multiple brett descriptors clearly present.
 - 9-10: Brett is dominant and repeatedly mentioned.
 
 Alcohol (0-10): Look for actual % if mentioned (under 12% = 3, 12-13% = 5, 13-14% = 7,
 14-15% = 8, over 15% = 9-10). Also words like "hot", "warming", "heady", "low alcohol",
-"light", "easy drinking".
+"light", "easy drinking". Danish: "alkohol", "let drikkelig", "varm".
 
 Sweetness (0-10): Look for "dry", "bone dry", "off-dry", "hint of sweetness", "semi-sweet",
-"sweet", "residual sugar", "RS". Bone dry = 1, dry = 2, off-dry = 4, semi-sweet = 6, sweet = 8+.
+"sweet", "residual sugar". Bone dry = 1, dry = 2, off-dry = 4, semi-sweet = 6, sweet = 8+.
+Danish: "tør", "sød", "restsødme".
 
 Reviews:
 {review_text}
