@@ -334,6 +334,7 @@ with st.form("wine_form"):
 if submitted and wine_name:
     with st.spinner("Fetching CellarTracker community notes..."):
         ct_notes, ct_url = get_cellartracker_public_notes(wine_name)
+        st.write(f"CT Debug - URL found: {ct_url}")
 
     with st.spinner("Searching for additional reviews..."):
         review_text, sources = search_wine_reviews(wine_name)
