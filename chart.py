@@ -44,12 +44,12 @@ def search_wine_reviews(wine_name):
     headers = {"X-API-KEY": SERPER_API_KEY, "Content-Type": "application/json"}
     url = "https://google.serper.dev/search"
     queries = [
-        f"{wine_name} tasting notes review",
-        f"{wine_name} site:cellartracker.com",
-        f"{wine_name} site:vivino.com",
-        f"{wine_name} site:wine-searcher.com tasting notes",
-        f"{wine_name} site:decanter.com review",
-        f"{wine_name} barnyard brett funky tasting notes",
+        f"{wine_name} site:cellartracker.com/wine",
+        f"{wine_name} tasting notes barnyard brett funky earthy",
+        f"{wine_name} site:decanter.com tasting notes",
+        f"{wine_name} site:jamessuckling.com tasting notes",
+        f"{wine_name} site:wine-advocate.com tasting notes",
+        f"{wine_name} avis degustation notes dégustation",
     ]
     snippets = []
     sources = []
