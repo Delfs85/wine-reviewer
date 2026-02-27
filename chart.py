@@ -112,45 +112,34 @@ Danish: "eftersmag", "lang", "kort".
 Complexity (0-10): Look for "complex", "layered", "multidimensional", "nuanced", "evolving",
 "simple", "straightforward". Danish: "kompleks", "lagdelt", "enkel".
 
-Funky (0-10): Score based EXCLUSIVELY on smell and taste descriptors in tasting notes.
-IGNORE COMPLETELY: Any mention of production methods such as "natural", "organic",
-"biodynamic", "unfined", "unfiltered", "spontaneous fermentation", "carbonic maceration",
-"minimal SO2", "no sulfur", "natural yeast", or winemaker philosophy.
-These tell us NOTHING about how the wine smells or tastes.
-ONLY score if tasting notes explicitly describe the smell or taste using these words:
-Look for these words in ANY language:
-English: "funky", "wild", "natural", "earthy", "smoke", "gunpowder", "reduction",
-"reductive", "sulfur", "struck match", "volatile", "VA", "brett-like", "sweaty",
-"unconventional", "acquired taste", "natural wine character".
-Danish: "funky", "vild", "naturvin", "jordagtig", "røg", "reduktiv", "ustabil",
-"elektrisk", "beskidt", "udfordrende", "naturlig".
-French: "sauvage", "terreux", "fume", "reduit", "volatile".
-IMPORTANT: If ANY reviewer says the wine has "too much" of these characteristics,
-or explicitly complains about gunpowder, funkiness or natural wine taste, score 8 or higher.
-If a descriptor is mentioned negatively or as a flaw, that means it is very present - score high.
+Funky (0-10): Score based EXCLUSIVELY on how the wine smells and tastes as described in tasting notes.
+Use your expert knowledge as a sommelier to interpret language in context — for example,
+"reduction" in "red currant reduction" is a cooking term and should be ignored, while
+"reductive" or "reduction on the nose" refers to a wine characteristic and should score higher.
+Similarly, "smoke" in a food pairing context is irrelevant, but "smoky" describing the wine's
+aroma is relevant.
+IGNORE: Production methods, winemaking philosophy, food pairings, cooking descriptions.
+ONLY score based on: actual smell and taste descriptions that indicate wildness, volatility,
+sulfur, gunpowder, funk, or unconventional natural wine character.
 Scoring:
-- 0-2: None of these descriptors present. Clean, conventional style.
-- 3-4: One or two mild hints mentioned positively.
+- 0-2: No funky characteristics in the tasting notes whatsoever.
+- 3-4: One mild hint clearly describing the wine's smell or taste.
 - 5-6: Clearly present but not dominant.
-- 7-8: Strongly present, mentioned by multiple reviewers OR mentioned as excessive/a flaw.
-- 9-10: Overwhelming, repeatedly flagged as too much or a major characteristic.
+- 7-8: Strongly present, mentioned by multiple reviewers or as excessive.
+- 9-10: Overwhelming, repeatedly flagged as a major characteristic.
 
-Brett (0-10): Look for these words in ANY language:
-English: "brett", "brettanomyces", "barnyard", "horse", "horse saddle", "stable",
-"wet dog", "band-aid", "animal", "farm", "manure".
-Danish: "hestestald", "stald", "hest", "lo", "staldlugt", "dyrisk",
-"bondegaard", "beskidt".
-French: "ecurie", "cheval", "animal", "etable", "fumier".
-Also score higher if the wine is described as having strong terroir character
-in a specifically animal or earthy sense in any language.
-IMPORTANT: If ANY reviewer explicitly mentions brett by name or says there is "lots of brett",
-score 8 or higher immediately. A complaint about brett means it is very present.
+Brett (0-10): Use your expert sommelier knowledge to identify brett (brettanomyces) character
+in tasting notes written in ANY language. Brett manifests as barnyard, horse, stable, wet dog,
+band-aid, or animal smells and tastes. Use context to distinguish brett from normal terroir —
+"damp earth" or "mushroom" in a classic Nebbiolo or Pinot Noir context is normal terroir,
+NOT brett. Only score brett when the language clearly points to animal/barnyard/microbial
+character that goes beyond normal terroir expression.
 Scoring:
-- 0-2: No brett descriptors present whatsoever.
-- 3-4: One mild hint mentioned once.
+- 0-2: No brett characteristics present.
+- 3-4: One mild hint that could indicate brett.
 - 5-6: Clearly present, mentioned positively or neutrally.
-- 7-8: Strongly present, explicitly named or mentioned as excessive by any reviewer.
-- 9-10: Brett is dominant, repeatedly mentioned or flagged as a major flaw by multiple reviewers.
+- 7-8: Strongly present, explicitly named or mentioned as excessive.
+- 9-10: Brett is dominant, repeatedly mentioned or flagged as a major flaw.
 
 Alcohol (0-10): Look for actual % if mentioned (under 12% = 3, 12-13% = 5, 13-14% = 7,
 14-15% = 8, over 15% = 9-10). Also words like "hot", "warming", "heady", "low alcohol",
