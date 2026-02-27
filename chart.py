@@ -137,7 +137,7 @@ Scoring:
 
 Brett (0-10): Look for these words in ANY language:
 English: "brett", "brettanomyces", "barnyard", "horse", "horse saddle", "stable",
-"wet dog", "band-aid", "earthy", "leather", "animal", "farm", "manure".
+"wet dog", "band-aid", "leather", "animal", "farm", "manure".
 Danish: "hestestald", "stald", "hest", "lo", "staldlugt", "laeder", "dyrisk",
 "landlig", "bondegaard", "beskidt".
 French: "ecurie", "cheval", "cuir", "animal", "etable", "fumier".
