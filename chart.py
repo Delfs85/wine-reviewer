@@ -87,6 +87,16 @@ Analyse the following reviews of "{wine_name}" and score each parameter from 0-1
 Be sensitive to subtle language — reviewers rarely use technical terms directly,
 so you must interpret descriptive language carefully across all languages.
 
+PRODUCER CONTEXT: Before scoring, consider what you know about the producer's 
+winemaking style. If the producer is known for natural, biodynamic, or 
+low-intervention winemaking, treat ambiguous descriptors like "wild", 
+"forest floor", "volatile acidity", "herbs", "sappy", "earthy" as stronger 
+indicators of funk and brett than you would for a conventional producer.
+Conversely, if the producer is known for classic, conventional winemaking, 
+descriptors like "leather" or "earthy" are likely normal terroir expression 
+and should not inflate Funky or Brett scores.
+Use your sommelier knowledge of the producer to calibrate your scoring accordingly.
+
 SCORING GUIDANCE:
 
 Quality (0-10): Overall quality and pleasure. Use any mention of scores (e.g. 90 points = ~8,
