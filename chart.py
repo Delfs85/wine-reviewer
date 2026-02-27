@@ -14,118 +14,9 @@ SERPER_API_KEY = os.getenv("SERPER_API_KEY")
 
 def fetch_page_text(url):
     try:
-        headers = {"User-Agent": "Mozilla/5.0"}
+        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36"}
         response = requests.get(url, headers=headers, timeout=10)
-        if response.status_code == 200:
-            from html.parser import HTMLParser
-            class TextExtractor(HTMLParser):
-                def __init__(self):
-                    super().__init__()
-                    self.text = []
-                    self.skip = False
-                def handle_starttag(self, tag, attrs):
-                    if tag in ['script', 'style', 'nav', 'header', 'footer']:
-                        self.skip = True
-                def handle_endtag(self, tag):
-                    if tag in ['script', 'style', 'nav', 'header', 'footer']:
-                        self.skip = False
-                def handle_data(self, data):
-                    if not self.skip and data.strip():
-                        self.text.append(data.strip())
-            parser = TextExtractor()
-            parser.feed(response.text)
-            full_text = " ".join(parser.text)
-            return full_text[:3000]
-    except:
-        pass
-    return None
-
-def get_cellartracker_public_notes(wine_name):
-    try:
-        # Search Google for the CellarTracker notes page
-        headers_serper = {"X-API-KEY": SERPER_API_KEY, "Content-Type": "application/json"}
-        payload = {"q": f"{wine_name} site:cellartracker.com/notes.asp", "num": 3}
-        response = requests.post("https://google.serper.dev/search", headers=headers_serper, json=payload)
-        results = response.json()
-        
-        ct_url = None
-        for r in results.get("organic", []):
-            link = r.get("link", "")
-            if "cellartracker.com/notes.asp" in link or "cellartracker.com/wine.asp" in link:
-                ct_url = link
-                break
-        
-        if not ct_url:
-            # Try searching for wine.asp instead
-            payload2 = {"q": f"{wine_name} site:cellartracker.com/wine.asp", "num": 3}
-            response2 = requests.post("https://google.serper.dev/search", headers=headers_serper, json=payload2)
-            results2 = response2.json()
-            for r in results2.get("organic", []):
-                link = r.get("link", "")
-                if "cellartracker.com" in link:
-                    # Convert wine.asp to notes.asp
-                    ct_url = link.replace("wine.asp", "notes.asp")
-                    break
-
-        # Try wine.asp as fallback
-        if not ct_url:
-            payload3 = {"q": f"{wine_name} cellartracker tasting notes", "num": 5}
-            response3 = requests.post("https://google.serper.dev/search", headers=headers_serper, json=payload3)
-            results3 = response3.json()
-            for r in results3.get("organic", []):
-                link = r.get("link", "")
-                if "cellartracker.com" in link:
-                    ct_url = link
-                    break
-                
-        if not ct_url:
-            return "", None
-
-        # Fetch the public CellarTracker notes page
-        headers_fetch = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
-        ct_response = requests.get(ct_url, headers=headers_fetch, timeout=15)
-        
-        if ct_response.status_code != 200:
-            return "", ct_url
-
-        # Extract tasting note text
-        from html.parser import HTMLParser
-        class NoteExtractor(HTMLParser):
-            def __init__(self):
-                super().__init__()
-                self.notes = []
-                self.current_note = []
-                self.in_note = False
-                self.skip = False
-            def handle_starttag(self, tag, attrs):
-                if tag in ['script', 'style', 'nav']:
-                    self.skip = True
-                attrs_dict = dict(attrs)
-                cls = attrs_dict.get('class', '')
-                if 'note' in cls.lower() or 'tasting' in cls.lower():
-                    self.in_note = True
-            def handle_endtag(self, tag):
-                if tag in ['script', 'style', 'nav']:
-                    self.skip = False
-            def handle_data(self, data):
-                if not self.skip and data.strip() and len(data.strip()) > 20:
-                    self.notes.append(data.strip())
-
-        parser = NoteExtractor()
-        parser.feed(ct_response.text)
-        
-        # Get all meaningful text chunks
-        full_text = " ".join(parser.notes[:50])
-        return full_text[:4000], ct_url
-
-    except Exception as e:
-        return "", None
-
-def fetch_page_text(url):
-    try:
-        headers = {"User-Agent": "Mozilla/5.0"}
-        response = requests.get(url, headers=headers, timeout=10)
-        if response.status_code == 200:
+        if response.status_code == 200 and len(response.text) > 100:
             from html.parser import HTMLParser
             class TextExtractor(HTMLParser):
                 def __init__(self):
@@ -153,9 +44,10 @@ def search_wine_reviews(wine_name):
     headers = {"X-API-KEY": SERPER_API_KEY, "Content-Type": "application/json"}
     url = "https://google.serper.dev/search"
     queries = [
+        f"{wine_name} tasting notes cellartracker",
+        f"{wine_name} tasting notes vivino",
         f"{wine_name} tasting notes review",
         f"{wine_name} site:decanter.com tasting notes",
-        f"{wine_name} site:jamessuckling.com tasting notes",
         f"{wine_name} barnyard brett funky earthy tasting notes",
         f"{wine_name} avis degustation notes dégustation",
     ]
@@ -168,11 +60,14 @@ def search_wine_reviews(wine_name):
         for r in results.get("organic", []):
             link = r.get("link", "")
             if link and link not in [s["link"] for s in sources]:
-                full_text = fetch_page_text(link)
-                if full_text:
-                    snippets.append(full_text)
-                elif "snippet" in r:
+                # Always include the snippet first
+                if "snippet" in r and r["snippet"]:
                     snippets.append(r["snippet"])
+                # Try to fetch full page for non-blocked sites
+                if not any(blocked in link for blocked in ["vivino.com", "cellartracker.com"]):
+                    full_text = fetch_page_text(link)
+                    if full_text:
+                        snippets.append(full_text)
                 sources.append({
                     "title": r.get("title", "Unknown"),
                     "link": link
@@ -343,38 +238,19 @@ with st.form("wine_form"):
     submitted = st.form_submit_button("Analyse Wine")
 
 if submitted and wine_name:
-    with st.spinner("Fetching CellarTracker community notes..."):
-        ct_notes, ct_url = get_cellartracker_public_notes(wine_name)
-        st.write(f"CT Debug - URL found: {ct_url}")
-        # Test direct fetch
-        try:
-            test_r = requests.get(ct_url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}, timeout=15)
-            st.write(f"CT Debug - Status: {test_r.status_code}, Length: {len(test_r.text)}")
-            st.write(f"CT Debug - First 500 chars: {test_r.text[:500]}")
-        except Exception as e:
-            st.write(f"CT Debug - Error: {e}")
-
-    with st.spinner("Searching for additional reviews..."):
+    with st.spinner("Searching for reviews..."):
         review_text, sources = search_wine_reviews(wine_name)
 
-    combined_review = ""
-    if ct_notes:
-        combined_review += f"=== CELLARTRACKER COMMUNITY NOTES ===\n{ct_notes}\n\n"
-    combined_review += f"=== WEB REVIEWS ===\n{review_text}"
-
-    if not combined_review.strip():
+    if not review_text:
         st.error("No reviews found. Try a different wine name.")
     else:
         with st.spinner("Analysing reviews with AI..."):
             try:
-                result = analyse_wine(wine_name, combined_review)
+                result = analyse_wine(wine_name, review_text)
                 wine_type = result["wine_type"]
                 scores = result["scores"]
                 fig = draw_chart(wine_name, wine_type, scores)
                 st.pyplot(fig, use_container_width=False)
-
-                with st.expander("📝 CellarTracker notes"):
-                    st.write(ct_notes if ct_notes else "No CellarTracker notes found.")
 
                 with st.expander("📝 Raw review snippets"):
                     st.write(review_text)
