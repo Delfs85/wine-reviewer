@@ -137,10 +137,10 @@ Scoring:
 
 Brett (0-10): Look for these words in ANY language:
 English: "brett", "brettanomyces", "barnyard", "horse", "horse saddle", "stable",
-"wet dog", "band-aid", "leather", "animal", "farm", "manure".
-Danish: "hestestald", "stald", "hest", "lo", "staldlugt", "laeder", "dyrisk",
-"landlig", "bondegaard", "beskidt".
-French: "ecurie", "cheval", "cuir", "animal", "etable", "fumier".
+"wet dog", "band-aid", "animal", "farm", "manure".
+Danish: "hestestald", "stald", "hest", "lo", "staldlugt", "dyrisk",
+"bondegaard", "beskidt".
+French: "ecurie", "cheval", "animal", "etable", "fumier".
 Also score higher if the wine is described as having strong terroir character
 in a specifically animal or earthy sense in any language.
 IMPORTANT: If ANY reviewer explicitly mentions brett by name or says there is "lots of brett",
