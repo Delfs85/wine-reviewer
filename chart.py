@@ -112,7 +112,12 @@ Danish: "eftersmag", "lang", "kort".
 Complexity (0-10): Look for "complex", "layered", "multidimensional", "nuanced", "evolving",
 "simple", "straightforward". Danish: "kompleks", "lagdelt", "enkel".
 
-Funky (0-10): Score based on SMELL AND TASTE ONLY - not production methods.
+Funky (0-10): Score based EXCLUSIVELY on smell and taste descriptors in tasting notes.
+IGNORE COMPLETELY: Any mention of production methods such as "natural", "organic",
+"biodynamic", "unfined", "unfiltered", "spontaneous fermentation", "carbonic maceration",
+"minimal SO2", "no sulfur", "natural yeast", or winemaker philosophy.
+These tell us NOTHING about how the wine smells or tastes.
+ONLY score if tasting notes explicitly describe the smell or taste using these words:
 Look for these words in ANY language:
 English: "funky", "wild", "natural", "earthy", "smoke", "gunpowder", "reduction",
 "reductive", "sulfur", "struck match", "volatile", "VA", "brett-like", "sweaty",
