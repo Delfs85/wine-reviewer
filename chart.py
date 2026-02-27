@@ -67,6 +67,17 @@ def get_cellartracker_public_notes(wine_name):
                     ct_url = link.replace("wine.asp", "notes.asp")
                     break
 
+        # Try wine.asp as fallback
+        if not ct_url:
+            payload3 = {"q": f"{wine_name} cellartracker tasting notes", "num": 5}
+            response3 = requests.post("https://google.serper.dev/search", headers=headers_serper, json=payload3)
+            results3 = response3.json()
+            for r in results3.get("organic", []):
+                link = r.get("link", "")
+                if "cellartracker.com" in link:
+                    ct_url = link
+                    break
+                
         if not ct_url:
             return "", None
 
