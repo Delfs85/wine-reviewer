@@ -335,6 +335,13 @@ if submitted and wine_name:
     with st.spinner("Fetching CellarTracker community notes..."):
         ct_notes, ct_url = get_cellartracker_public_notes(wine_name)
         st.write(f"CT Debug - URL found: {ct_url}")
+        # Test direct fetch
+        try:
+            test_r = requests.get(ct_url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}, timeout=15)
+            st.write(f"CT Debug - Status: {test_r.status_code}, Length: {len(test_r.text)}")
+            st.write(f"CT Debug - First 500 chars: {test_r.text[:500]}")
+        except Exception as e:
+            st.write(f"CT Debug - Error: {e}")
 
     with st.spinner("Searching for additional reviews..."):
         review_text, sources = search_wine_reviews(wine_name)
